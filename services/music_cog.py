@@ -1,7 +1,7 @@
-from ast import alias
 import discord
 from discord.ext import commands
 from youtube_dl import YoutubeDL
+from youtube_dl.utils import DownloadError
 
 
 class music_cog(commands.Cog):
@@ -10,17 +10,30 @@ class music_cog(commands.Cog):
         self.is_playing = False
         self.is_paused = False
         self.music_queue = []
-        self.YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
+        self.YDL_OPTIONS = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'ignoreerrors': True,
+        }
         self.FFMPEG_OPTIONS = {
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
         self.vc = None
 
     def search_yt(self, item):
+        print(item)
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
             try:
-                info = ydl.extract_info("ytsearch:%s" %
-                                        item, download=False)['entries'][0]
-            except Exception:
+                info = ydl.extract_info("ytsearch:" + item, download=False)[
+                    'entries'][0]  # ! error here searching
+            except DownloadError as e:
+                print(f"DownloadError: {e}")
+                return False
+            except Exception as e:
+                print(f"An error occurred: {e}")
                 return False
 
         return {'source': info['formats'][0]['url'], 'title': info['title']}
@@ -69,14 +82,13 @@ class music_cog(commands.Cog):
 
         voice_channel = ctx.author.voice.channel
         if voice_channel is None:
-            # you need to be connected so that the bot knows where to go
-            await ctx.send("Connect to a voice channel!")
+            await ctx.send("You must connect to a voice channel first!")
         elif self.is_paused:
             self.vc.resume()
         else:
             song = self.search_yt(query)
             if type(song) == type(True):
-                await ctx.send("Could not download the song. Incorrect format try another keyword. This could be due to playlist or a livestream format.")
+                await ctx.send("Could not download the song. Incorrect format try another keyword.")
             else:
                 await ctx.send("Song added to the queue")
                 self.music_queue.append([song, voice_channel])

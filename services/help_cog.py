@@ -25,9 +25,8 @@ class help_cog(commands.Cog):
     async def on_ready(self):
         for guild in self.bot.guilds:
             for channel in guild.text_channels:
-                self.text_channel_list.append(channel)
-
-        await self.send_to_specific_channel(self.help_message, CHANEL_NAME)
+                if channel == CHANEL_NAME:
+                    await self.send_to_specific_channel(self.help_message, CHANEL_NAME)
 
     @commands.command(name="help", help="Displays all the available commands")
     async def help(self, ctx):
