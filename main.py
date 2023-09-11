@@ -46,8 +46,6 @@ ytdl_format_options = {
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-music_queue = []
-is_playing = False
 
 
 # object to manage songs fetching
