@@ -8,4 +8,6 @@ Discord Music Bot using Python.
 6. Type: 'python main.py'.
 
 * When installing additional packages use: 'pip freeze > ./requirements.txt' (make sure venv is activated).
+  
 * Create and add bot to discord: https://discordpy.readthedocs.io/en/stable/discord.html
+* FFmpeg is required to download: https://ffmpeg.org/
